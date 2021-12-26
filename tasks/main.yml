@@ -1,0 +1,42 @@
+---
+- name: Install SELinux packages
+  ansible.builtin.package:
+    name: "{{ selinux_packages }}"
+  notify:
+    - gather ansible_selinux
+
+- name: Set SELinux mode
+  ansible.posix.selinux:
+    state: "{{ selinux_mode }}"
+    policy: "{{ selinux_policy }}"
+  register: __selinux_mode
+  notify:
+    - selinux autorelabel
+    - selinux reboot
+
+- name: Flush handlers to gather ansible_selinux and reboot if needed
+  meta: flush_handlers
+
+- name: Set SELinux booleans
+  ansible.posix.seboolean:
+    name: "{{ item.name }}"
+    persistent: "{{ item.persistent }}"
+    state: "{{ item.state }}"
+  loop: "{{ selinux_booleans }}"
+
+- name: Manage SELinux file context
+  community.general.sefcontext:
+    ftype: "{{ item.ftype | default(omit) }}"
+    reload: "{{ item.reload | default(omit) }}"
+    selevel: "{{ item.selevel | default(omit) }}"
+    setype: "{{ item.setype }}"
+    seuser: "{{ item.seuser | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    target: "{{ item.target }}"
+  loop: "{{ selinux_fcontexts }}"
+  register: __selinux_fcontext
+  notify: selinux restorecon
+
+- name: Include custom policies tasks
+  ansible.builtin.include_tasks: custom_policies.yml
+  loop: "{{ selinux_custom_policies }}"

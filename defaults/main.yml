@@ -1,0 +1,12 @@
+---
+selinux_packages:
+  - "{{ 'python3-libselinux' if ansible_distribution_major_version == '8' else 'libselinux-python' }}"
+  - "{{ 'python3-libsemanage' if ansible_distribution_major_version == '8' else 'libsemanage-python' }}"
+  - "{{ 'python3-policycoreutils' if ansible_distribution_major_version == '8' else 'policycoreutils-python' }}"
+
+selinux_mode: enforcing
+selinux_policy: targeted
+selinux_booleans: []
+selinux_fcontexts: []
+selinux_fcontext_relabel: true
+selinux_custom_policies: []

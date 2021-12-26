@@ -1,0 +1,17 @@
+---
+- name: Copy custom type enforcement
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}/{{ item.name }}.te"
+    content: "{{ item.policy }}"
+  register: __selinux_custom_policy
+
+- block:
+  - name: Create custom module
+    ansible.builtin.command: "checkmodule -M -m {{ item.dest }}/{{ item.name }}.te -o {{ item.dest }}/{{ item.name }}.mod"
+
+  - name: Create custom package
+    ansible.builtin.command: "semodule_package -o {{ item.dest }}/{{ item.name }}.pp -m {{ item.dest }}/{{ item.name }}.mod"
+
+  - name: Install custom poicy
+    ansible.builtin.command: "semodule -i {{ item.dest }}/{{ item.name }}.pp"
+  when: __selinux_custom_policy.changed
