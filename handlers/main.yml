@@ -1,0 +1,16 @@
+---
+- name: selinux autorelabel
+  ansible.builtin.file:
+    path: /.autorelabel
+    state: touch
+
+- name: selinux reboot
+  ansible.builtin.reboot:
+  when: __selinux_mode.reboot_required | default(omit)
+
+- name: selinux restorecon
+  ansible.builtin.command: "/sbin/restorecon -irv {{ item.item.target_root }}"
+  loop: "{{ __selinux_fcontext.results }}"
+  when:
+    - selinux_fcontext_relabel | bool
+    - item.changed
