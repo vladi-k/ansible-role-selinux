@@ -2,12 +2,8 @@
 - name: Install SELinux packages
   ansible.builtin.package:
     name: "{{ selinux_packages }}"
-  register: __selinux_packages
-
-- name: Gather SELinux facts
-  ansible.builtin.setup:
-    filter: ansible_selinux
-  when: __selinux_packages.changed
+  notify:
+    - gather ansible_selinux
 
 - name: Set SELinux mode
   ansible.posix.selinux:
@@ -17,6 +13,9 @@
   notify:
     - selinux autorelabel
     - selinux reboot
+
+- name: Flush handlers to gather ansible_selinux and reboot if needed
+  meta: flush_handlers
 
 - name: Set SELinux booleans
   ansible.posix.seboolean:
@@ -41,6 +40,3 @@
 - name: Include custom policies tasks
   ansible.builtin.include_tasks: custom_policies.yml
   loop: "{{ selinux_custom_policies }}"
-
-- name: Flush handlers
-  meta: flush_handlers

@@ -1,4 +1,8 @@
 ---
+- name: gather ansible_selinux
+  ansible.builtin.setup:
+    filter: ansible_selinux
+
 - name: selinux autorelabel
   ansible.builtin.file:
     path: /.autorelabel
