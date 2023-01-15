@@ -1,18 +1,21 @@
 ---
-- name: gather ansible_selinux
+- name: Gather ansible_selinux
   ansible.builtin.setup:
     filter: ansible_selinux
 
-- name: selinux autorelabel
+- name: Selinux autorelabel
   ansible.builtin.file:
     path: /.autorelabel
     state: touch
+    owner: root
+    group: root
+    mode: 0644
 
-- name: selinux reboot
+- name: Selinux reboot
   ansible.builtin.reboot:
   when: __selinux_mode.reboot_required | default(omit)
 
-- name: selinux restorecon
+- name: Selinux restorecon
   ansible.builtin.command: "/sbin/restorecon -irv {{ item.item.target_root }}"
   loop: "{{ __selinux_fcontext.results }}"
   when:

@@ -3,7 +3,7 @@
   ansible.builtin.package:
     name: "{{ selinux_packages }}"
   notify:
-    - gather ansible_selinux
+    - Gather ansible_selinux
 
 - name: Set SELinux mode
   ansible.posix.selinux:
@@ -11,11 +11,11 @@
     policy: "{{ selinux_policy }}"
   register: __selinux_mode
   notify:
-    - selinux autorelabel
-    - selinux reboot
+    - Selinux autorelabel
+    - Selinux reboot
 
 - name: Flush handlers to gather ansible_selinux and reboot if needed
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
 - name: Set SELinux booleans
   ansible.posix.seboolean:
@@ -35,7 +35,18 @@
     target: "{{ item.target }}"
   loop: "{{ selinux_fcontexts }}"
   register: __selinux_fcontext
-  notify: selinux restorecon
+  notify: Selinux restorecon
+
+- name: Manage SELinux network port type definisions
+  community.general.seport:
+    ignore_selinux_state: "{{ item.ignore_selinux_state | default(omit) }}"
+    local: "{{ item.local | default(omit) }}"
+    ports: "{{ item.ports }}"
+    proto: "{{ item.proto }}"
+    reload: "{{ item.reload | default(omit) }}"
+    setype: "{{ item.setype | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+  loop: "{{ selinux_ports }}"
 
 - name: Include custom policies tasks
   ansible.builtin.include_tasks: custom_policies.yml

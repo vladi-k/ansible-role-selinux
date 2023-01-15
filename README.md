@@ -31,6 +31,13 @@ selinux_fcontexts:
     target_root: /mnt/share
     setype: samba_share_t
 ```
+* `selinux_ports` - list of SELinux network port type definisions, example:
+```yaml
+selinux_ports:
+  - ports: 2194
+    proto: udp
+    setype: openvpn_port_t
+```
 
 * `selinux_fcontext_relabel` - boolean to run `restorecon` when applying `selinux_fcontexts`.
 * `selinux_custom_policies` - list of custon SELinux policies, example:
