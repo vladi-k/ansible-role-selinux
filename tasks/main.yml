@@ -49,5 +49,8 @@
   loop: "{{ selinux_ports }}"
 
 - name: Include custom policies tasks
-  ansible.builtin.include_tasks: custom_policies.yml
+  ansible.builtin.include_tasks:
+    file: custom_policies.yml
   loop: "{{ selinux_custom_policies }}"
+  loop_control:
+    loop_var: __policy

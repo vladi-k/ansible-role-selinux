@@ -1,20 +1,20 @@
 ---
 name: Ansible Lint
 
-on:
-  - push
+"on":
   - pull_request
 
 jobs:
   build:
-
+    name: Ansible Lint
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@main
-
-    - name: Lint Ansible Role
-      uses: ansible-community/ansible-lint-action@main
-      # optional:
-      # with:
-      #  args: "" # args to pass to ansible-lint command
+      - uses: actions/checkout@v4
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@main
+        with:
+          #   args: ""
+          #   setup_python: "true"
+          #   working_directory: ""
+          requirements_file: requirements.yml

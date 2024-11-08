@@ -1,18 +1,24 @@
 ---
 - name: Copy custom type enforcement
   ansible.builtin.copy:
-    dest: "{{ item.dest }}/{{ item.name }}.te"
-    content: "{{ item.policy }}"
+    dest: "{{ __policy.dest }}/{{ __policy.name }}.te"
+    content: "{{ __policy.policy }}"
+    mode: '0644'
   register: __selinux_custom_policy
 
 - name: Block for custom policy
+  when: __selinux_custom_policy.changed
   block:
     - name: Create custom module
-      ansible.builtin.command: "checkmodule -M -m {{ item.dest }}/{{ item.name }}.te -o {{ item.dest }}/{{ item.name }}.mod"
+      ansible.builtin.command:
+        # yamllint disable-line rule:line-length
+        cmd: "checkmodule -M -m {{ __policy.dest }}/{{ __policy.name }}.te -o {{ __policy.dest }}/{{ __policy.name }}.mod"
 
     - name: Create custom package
-      ansible.builtin.command: "semodule_package -o {{ item.dest }}/{{ item.name }}.pp -m {{ item.dest }}/{{ item.name }}.mod"
+      ansible.builtin.command:
+        # yamllint disable-line rule:line-length
+        cmd: "semodule_package -o {{ __policy.dest }}/{{ __policy.name }}.pp -m {{ __policy.dest }}/{{ __policy.name }}.mod"
 
     - name: Install custom poicy
-      ansible.builtin.command: "semodule -i {{ item.dest }}/{{ item.name }}.pp"
-  when: __selinux_custom_policy.changed
+      ansible.builtin.command:
+        cmd: "semodule -i {{ __policy.dest }}/{{ __policy.name }}.pp"
